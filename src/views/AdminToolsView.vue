@@ -57,6 +57,7 @@
                   <option value="gpt-4">GPT 4</option>
                   <option value="gpt-4-mini"> GPT 4 mini</option>
                   <option value="gpt-3"> GPT 3</option>
+                  <option value="dall-e"> DALL E</option>
                 </select>      
               </div>
               <div>

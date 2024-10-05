@@ -58,7 +58,7 @@
               </p>
             </div>
           </div>
-          <div v-if="errorMessage">{{ errorMessage }}</div>
+          <div v-if="errorMessage" style="color:red">{{ errorMessage }}</div>
           <button
             type="submit"
             class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -150,9 +150,10 @@
           errorMessage.value = signupResponse.data?.message
         }
       } catch (error) {
-        errorMessage.value = error.response?.data?.message;
-        toast.error(error.response?.data?.message || 'Something went wrong. Login failed')
-        console.log(error.response?.data?.message);
+        console.log(error)
+        errorMessage.value = error.response?.data?.message || error.response?.data?.errors[0];
+        toast.error(errorMessage.value || 'Something went wrong. Login failed')
+        console.log(error.response?.data?.message || error.response?.data?.errors);
       }
     };
   </script>
