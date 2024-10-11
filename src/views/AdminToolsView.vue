@@ -235,8 +235,9 @@
     downloadTypes: 'json'
   })
   
-  const countdown = ref(30);  
-  let intervalId = null; 
+  const countdown = ref(100);
+  const intervalId = ref(null)
+  // let intervalId = null; 
   // const firstItem = computed( () => {
   //   generateQuestions.value.item.split(',')[0].trim();
   // } )
@@ -250,12 +251,15 @@
     }
   
   const startCountdown = () => {
-    countdown.value = 30;
-    intervalId = setInterval(() => {
+    countdown.value = 100;
+    if (intervalId.value != null){
+      clearInterval(intervalId.value)
+    }
+    intervalId.value = setInterval(() => {
       if (countdown.value > 0) {
         countdown.value -= 1;
       } else {
-        clearInterval(intervalId);
+        clearInterval(intervalId.value);
       }
     }, 1000);
   };
