@@ -1,216 +1,182 @@
 <template>
-    <div class="min-h-screen bg-gray-100">
-      <!-- Header -->
-      <header class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 class="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
-          <div class="flex items-center">
-            <button class="p-2 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-              <bell-icon class="h-6 w-6" />
+  <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl font-bold text-gray-900 text-center mb-8">Study Tools</h1>
+      
+      <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="flex border-b border-gray-200">
+          <button
+            v-for="tool in tools"
+            :key="tool.id"
+            @click="activeTool = tool.id"
+            :class="[
+              'flex-1 text-center py-4 px-4 text-sm font-medium focus:outline-none',
+              activeTool === tool.id
+                ? 'text-purple-600 border-b-2 border-purple-600'
+                : 'text-gray-500 hover:text-gray-700'
+            ]"
+          >
+            {{ tool.name }}
+          </button>
+        </div>
+        
+        <div class="p-6">
+          <!-- Generate Questions Form -->
+          <form v-if="activeTool === 'generate'" @submit.prevent="handleGenerateQuestions" class="space-y-4">
+            <div>
+              <label for="prompt" class="block text-sm font-medium text-gray-700">Prompt</label>
+              <textarea
+                id="prompt"
+                v-model="generateQuestions.prompt"
+                rows="4"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                required
+              ></textarea>
+            </div>
+            <div>
+              <label for="model" class="block text-sm font-medium text-gray-700">Model</label>
+              <select
+                id="model"
+                v-model="generateQuestions.model"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
+                required
+              >
+                <option value="">Select a model</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                <option value="gpt-4">GPT-4</option>
+                <option value="davinci">Davinci</option>
+                <option value="curie">Curie</option>
+              </select>
+            </div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Generate Questions
             </button>
-            <div class="ml-3 relative">
-              <div>
-                <button class="flex items-center focus:outline-none">
-                  <img class="h-8 w-8 rounded-full" src="" alt="Admin avatar" />
-                  <span class="ml-2 text-sm font-medium text-gray-700">Admin User</span>
-                  <chevron-down-icon class="ml-1 h-4 w-4 text-gray-400" />
-                </button>
+          </form>
+
+          <!-- Web Scraper Form -->
+          <form v-if="activeTool === 'scraper'" @submit.prevent="handleWebScraper" class="space-y-4">
+            <div>
+              <label for="site" class="block text-sm font-medium text-gray-700">Site URL</label>
+              <input type="url" id="site" v-model="webScraper.site" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+            </div>
+            <div>
+              <label for="content" class="block text-sm font-medium text-gray-700">HTML Tags to Scrape</label>
+              <select
+                id="content"
+                v-model="webScraper.content"
+                multiple
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md"
+                required
+              >
+                <option value="p">Paragraphs (p)</option>
+                <option value="h1">Headings 1 (h1)</option>
+                <option value="h2">Headings 2 (h2)</option>
+                <option value="h3">Headings 3 (h3)</option>
+                <option value="a">Links (a)</option>
+                <option value="img">Images (img)</option>
+                <option value="ul">Unordered Lists (ul)</option>
+                <option value="ol">Ordered Lists (ol)</option>
+                <option value="table">Tables (table)</option>
+              </select>
+            </div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Start Scraping
+            </button>
+          </form>
+
+          <!-- Upload to AWS Form -->
+          <form v-if="activeTool === 'aws'" @submit.prevent="handleAWSUpload" class="space-y-4">
+            <div>
+              <label for="bucketName" class="block text-sm font-medium text-gray-700">Bucket Name</label>
+              <input type="text" id="bucketName" v-model="awsUpload.bucketName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+            </div>
+            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+              <div class="space-y-1 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <div class="flex text-sm text-gray-600">
+                  <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+                    <span>Upload a file</span>
+                    <input id="file-upload" name="file-upload" type="file" class="sr-only" @change="handleFileChange">
+                  </label>
+                  <p class="pl-1">or drag and drop</p>
+                </div>
+                <p class="text-xs text-gray-500">
+                  PNG, JPG, GIF up to 10MB
+                </p>
               </div>
             </div>
-          </div>
-        </div>
-      </header>
-  
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <!-- User Management Card -->
-          <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-              <div class="flex items-center justify-between">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">User Management</h3>
-                <users-icon class="h-6 w-6 text-purple-500" />
-              </div>
-              <div class="mt-4">
-                <p class="text-sm text-gray-500">Manage user accounts, permissions, and roles.</p>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Upload to AWS
+            </button>
+          </form>
+
+          <!-- Import/Export Form -->
+          <form v-if="activeTool === 'importexport'" @submit.prevent="handleImportExport" class="space-y-4">
+            <div>
+              <label for="fileType" class="block text-sm font-medium text-gray-700">File Type</label>
+              <select id="fileType" v-model="importExport.fileType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md">
+                <option value=".pdf">.pdf</option>
+                <option value=".json">.json</option>
+                <option value=".csv">.csv</option>
+              </select>
+            </div>
+            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+              <div class="space-y-1 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <div class="flex text-sm text-gray-600">
+                  <label for="file-import" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
+                    <span>Upload a file</span>
+                    <input id="file-import" name="file-import" type="file" class="sr-only" @change="handleFileChange">
+                  </label>
+                  <p class="pl-1">or drag and drop</p>
+                </div>
+                <p class="text-xs text-gray-500">
+                  File type: {{ importExport.fileType }}
+                </p>
               </div>
             </div>
-            <div class="bg-gray-50 px-5 py-3">
-              <button @click="activeTab = 'users'" class="text-sm font-medium text-purple-600 hover:text-purple-500">
-                Manage Users
+            <div class="flex space-x-4">
+              <button type="button" @click="handleImport" class="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                Import
+              </button>
+              <button type="button" @click="handleExport" class="flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                Export
               </button>
             </div>
-          </div>
-  
-          <!-- Analytics Card -->
-          <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
+          </form>
+
+          <!-- API Key Generation -->
+          <div v-if="activeTool === 'apikey'" class="space-y-4">
+            <button @click="generateApiKey" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Generate API Key
+            </button>
+            <div v-if="apiKey" class="mt-4 p-4 bg-gray-100 rounded-md">
               <div class="flex items-center justify-between">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Analytics</h3>
-                <bar-chart-icon class="h-6 w-6 text-purple-500" />
-              </div>
-              <div class="mt-4">
-                <p class="text-sm text-gray-500">View detailed analytics and generate reports.</p>
-              </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-              <button @click="activeTab = 'analytics'" class="text-sm font-medium text-purple-600 hover:text-purple-500">
-                View Analytics
-              </button>
-            </div>
-          </div>
-  
-          <!-- System Settings Card -->
-          <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-              <div class="flex items-center justify-between">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">System Settings</h3>
-                <settings-icon class="h-6 w-6 text-purple-500" />
-              </div>
-              <div class="mt-4">
-                <p class="text-sm text-gray-500">Configure system-wide settings and preferences.</p>
-              </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-              <button @click="activeTab = 'settings'" class="text-sm font-medium text-purple-600 hover:text-purple-500">
-                Manage Settings
-              </button>
-            </div>
-          </div>
-  
-          <!-- Tools Card -->
-          <div class="bg-white overflow-hidden shadow rounded-lg">
-            <div class="p-5">
-              <div class="flex items-center justify-between">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Tools</h3>
-                <tool-icon class="h-6 w-6 text-purple-500" />
-              </div>
-              <div class="mt-4">
-                <p class="text-sm text-gray-500">Access various tools for content management and data handling.</p>
-              </div>
-            </div>
-            <div class="bg-gray-50 px-5 py-3">
-              <button @click="activeTab = 'tools'" class="text-sm font-medium text-purple-600 hover:text-purple-500">
-                Access Tools
-              </button>
-            </div>
-          </div>
-        </div>
-  
-        <!-- Active Tab Content -->
-        <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
-          <div class="px-4 py-5 sm:p-6">
-            <div v-if="activeTab === 'users'">
-              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">User Management</h3>
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-for="user in users" :key="user.id">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ user.name }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.role }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button class="text-purple-600 hover:text-purple-900 mr-2">Edit</button>
-                      <button class="text-red-600 hover:text-red-900">Delete</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div v-else-if="activeTab === 'analytics'">
-              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Analytics</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <h4 class="text-sm font-medium text-gray-500 mb-2">Total Users</h4>
-                  <p class="text-3xl font-semibold text-gray-900">{{ analytics.totalUsers }}</p>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <h4 class="text-sm font-medium text-gray-500 mb-2">Active Users</h4>
-                  <p class="text-3xl font-semibold text-gray-900">{{ analytics.activeUsers }}</p>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <h4 class="text-sm font-medium text-gray-500 mb-2">Revenue</h4>
-                  <p class="text-3xl font-semibold text-gray-900">${{ analytics.revenue.toLocaleString() }}</p>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <h4 class="text-sm font-medium text-gray-500 mb-2">Conversion Rate</h4>
-                  <p class="text-3xl font-semibold text-gray-900">{{ analytics.conversionRate }}%</p>
-                </div>
-              </div>
-            </div>
-            <div v-else-if="activeTab === 'settings'">
-              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">System Settings</h3>
-              <form @submit.prevent="saveSettings" class="space-y-4">
-                <div>
-                  <label for="site-name" class="block text-sm font-medium text-gray-700">Site Name</label>
-                  <input type="text" id="site-name" v-model="settings.siteName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" />
-                </div>
-                <div>
-                  <label for="maintenance-mode" class="block text-sm font-medium text-gray-700">Maintenance Mode</label>
-                  <select id="maintenance-mode" v-model="settings.maintenanceMode" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md">
-                    <option value="off">Off</option>
-                    <option value="on">On</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="default-language" class="block text-sm font-medium text-gray-700">Default Language</label>
-                  <select id="default-language" v-model="settings.defaultLanguage" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md">
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                  </select>
-                </div>
-                <div>
-                  <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                    Save Settings
-                  </button>
-                </div>
-              </form>
-            </div>
-            <div v-else-if="activeTab === 'tools'">
-              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Tools</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <h4 class="text-sm font-medium text-gray-700 mb-2">Generate Questions</h4>
-                  <p class="text-sm text-gray-500 mb-4">Create new questions for exams and study materials.</p>
-                  <button @click="generateQuestions" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                    <plus-icon class="h-5 w-5 mr-2" />
-                    Generate Questions
-                  </button>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <h4 class="text-sm font-medium text-gray-700 mb-2">Web Scraper</h4>
-                  <p class="text-sm text-gray-500 mb-4">Scrape web content for study materials.</p>
-                  <button @click="openWebScraper" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                    <globe-icon class="h-5 w-5 mr-2" />
-                    Open Web Scraper
-                  </button>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <h4 class="text-sm font-medium text-gray-700 mb-2">Upload to AWS</h4>
-                  <p class="text-sm text-gray-500 mb-4">Upload study materials to AWS storage.</p>
-                  <button @click="uploadToAWS" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                    <upload-icon class="h-5 w-5 mr-2" />
-                    Upload to AWS
-                  </button>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <h4 class="text-sm font-medium text-gray-700 mb-2">Import/Export</h4>
-                  <p class="text-sm text-gray-500 mb-4">Import or export study materials and user data.</p>
-                  <div class="space-x-2">
-                    <button @click="importData" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                      <download-icon class="h-5 w-5 mr-2" />
-                      Import
+                <div class="flex-1 mr-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
+                  <div class="flex items-center">
+                    <input
+                      :type="showApiKey ? 'text' : 'password'"
+                      :value="apiKey"
+                      readonly
+                      class="flex-1 block w-full px-3 py-2 sm:text-sm border-gray-300 rounded-md bg-white"
+                    />
+                    <button
+                      @click="toggleApiKeyVisibility"
+                      class="ml-2 p-2 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    >
+                      <eye-icon v-if="!showApiKey" class="h-5 w-5 text-gray-600" />
+                      <eye-off-icon v-else class="h-5 w-5 text-gray-600" />
                     </button>
-                    <button @click="exportData" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                      <upload-icon class="h-5 w-5 mr-2" />
-                      Export
+                    <button
+                      @click="copyApiKey"
+                      class="ml-2 p-2 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    >
+                      <copy-icon class="h-5 w-5 text-gray-600" />
                     </button>
                   </div>
                 </div>
@@ -220,64 +186,113 @@
         </div>
       </div>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref } from 'vue'
-  import { BellIcon, ChevronDownIcon, UsersIcon, BarChartIcon, SettingsIcon, PlusIcon, GlobeIcon, UploadIcon, DownloadIcon } from 'lucide-vue-next'
-  
-  const activeTab = ref('users')
-  
-  const users = ref([
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Editor' },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User' },
-  ])
-  
-  const analytics = ref({
-    totalUsers: 10897,
-    activeUsers: 8234,
-    revenue: 125000,
-    conversionRate: 3.2,
-  })
-  
-  const settings = ref({
-    siteName: 'My Awesome Site',
-    maintenanceMode: 'off',
-    defaultLanguage: 'en',
-  })
-  
-  const saveSettings = () => {
-    // Implement save settings logic here
-    console.log('Settings saved:', settings.value)
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { EyeIcon, EyeOffIcon, CopyIcon } from 'lucide-vue-next'
+
+const tools = [
+  { id: 'generate', name: 'Generate Questions' },
+  { id: 'scraper', name: 'Web Scraper' },
+  { id: 'aws', name: 'Upload to AWS' },
+  { id: 'importexport', name: 'Import/Export' },
+  { id: 'apikey', name: 'API Key' },
+]
+
+const activeTool = ref('generate')
+
+const generateQuestions = ref({
+  prompt: '',
+  model: '',
+})
+
+const webScraper = ref({
+  site: '',
+  content: [],
+})
+
+const awsUpload = ref({
+  bucketName: '',
+  file: null,
+})
+
+const importExport = ref({
+  fileType: '.pdf',
+  file: null,
+})
+
+const apiKey = ref('')
+const showApiKey = ref(false)
+
+const handleGenerateQuestions = () => {
+  console.log('Generating questions:', generateQuestions.value)
+  // Implement question generation logic here
+}
+
+const handleWebScraper = () => {
+  console.log('Web scraping:', webScraper.value)
+  // Implement web scraping logic here
+}
+
+const handleAWSUpload = () => {
+  console.log('Uploading to AWS:', awsUpload.value)
+  // Implement AWS upload logic here
+}
+
+const handleImportExport = () => {
+  console.log('Import/Export:', importExport.value)
+  // Implement import/export logic here
+}
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0]
+  if (activeTool.value === 'aws') {
+    awsUpload.value.file = file
+  } else if (activeTool.value === 'importexport') {
+    importExport.value.file = file
   }
-  
-  const generateQuestions = () => {
-    // Implement question generation logic here
-    console.log('Generating questions...')
+}
+
+const handleImport = () => {
+  console.log('Importing file:', importExport.value)
+  // Implement import logic here
+}
+
+const handleExport = () => {
+  console.log('Exporting file:', importExport.value)
+  // Implement export logic here
+}
+
+const generateApiKey = async () => {
+  try {
+    // Simulating an API call to generate a key
+    const response = await new Promise(resolve => setTimeout(() => resolve({ data: { key: 'sk-' + Math.random().toString(36).substr(2, 20) } }), 1000))
+    apiKey.value = response.data.key
+    showApiKey.value = false
+  } catch (error) {
+    console.error('Error generating API key:', error)
+    // Handle error (e.g., show an error message to the user)
   }
-  
-  const openWebScraper = () => {
-    // Implement web scraper logic here
-    console.log('Opening web scraper...')
-  }
-  
-  const uploadToAWS = () => {
-    // Implement AWS upload logic here
-    console.log('Uploading to AWS...')
-  }
-  
-  const importData = () => {
-    // Implement data import logic here
-    console.log('Importing data...')
-  }
-  
-  const exportData = () => {
-    // Implement data export logic here
-    console.log('Exporting data...')
-  }
-  </script>
-  
-  <style scoped>
-  /* Add any additional component-specific styles here */
-  </style>
+}
+
+const toggleApiKeyVisibility = () => {
+  showApiKey.value = !showApiKey.value
+}
+
+const copyApiKey = () => {
+  navigator.clipboard.writeText(apiKey.value)
+    .then(() => {
+      // Optionally, you can show a "Copied!" message to the user
+      console.log('API key copied to clipboard')
+    })
+    .catch(err => {
+      console.error('Failed to copy API key: ', err)
+    })
+}
+</script>
+
+<style scoped>
+/* Add any additional component-specific styles here */
+</style>

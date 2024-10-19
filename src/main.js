@@ -5,6 +5,7 @@ import 'vue-toastification/dist/index.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+import { useUserStore } from './stores/user';
 
 import App from './App.vue'
 import router from './router'
@@ -18,3 +19,5 @@ app.use(router)
 app.use(Toast)
 
 app.mount('#app')
+const userStore = useUserStore()
+userStore.applyAuthHeaders()

@@ -7,15 +7,17 @@
   
   <script setup>
   import { useUserStore } from '@/stores/user';
+  import { useStatsStore } from '@/stores/userStats';
   import { RouterLink, useRouter } from 'vue-router';
   const router = useRouter()
   
   
     const userStore = useUserStore();
+    const statsStore = useStatsStore();
   
     const handleLogout = () => {
     userStore.logout();
-    
+    statsStore.clearStats()
     router.push('/');
     };
   

@@ -14,9 +14,6 @@ export const useUserStore = defineStore('user', {
         this.token = token;
         this.user = user;
 
-        // Store the JWT token in localStorage for persistence
-        // localStorage.setItem('token', token);
-
         // Set the default Authorization header for all Axios requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${token.access}`;
       } catch (error) {
@@ -31,21 +28,19 @@ export const useUserStore = defineStore('user', {
 
       // Remove the token from localStorage
       localStorage.removeItem('token');
-
+      
       // Remove the Authorization header
       delete axios.defaults.headers.common['Authorization'];
     },
 
-    // // Restore user info from the JWT token stored in localStorage
-    // initializeStore() {
-    //   const token = localStorage.getItem('token');
-    //   if (token) {
-    //     this.token = token;
-    //     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    //     // Optionally, you can also load user data using the token if your backend supports it
-    //   }
-    // }
+    applyAuthHeaders() {
+      if (this.token) {
+        // Reapply the default Authorization header when store is initialized
+        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token.access}`;
+      }
+    },
   },
+  
   
   getters: {
     isAuthenticated: (state) => !!state.token,

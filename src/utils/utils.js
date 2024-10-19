@@ -1,5 +1,20 @@
 import { API_URL } from "./constants";
+import { formatDistanceToNow } from 'date-fns';
 
+// Example timestamp (in milliseconds)
+
+
+// console.log(timeAgo); // Output: "2 hours ago" (if current time is 12:00)
+
+
+export const formatDateTime = (datetime) => {
+    const timestamp = new Date(datetime).getTime();
+    let timeAgo = formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+    if (timeAgo.startsWith('about ')){
+        timeAgo = timeAgo.slice(6)
+    }
+    return timeAgo
+}
 export const getEndpoint = async (endpoint) => {
     try {
         const response = await axios.get(endpoint);
