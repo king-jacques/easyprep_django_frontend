@@ -89,6 +89,7 @@
         <div class="mt-8">
           <h2 class="text-lg leading-6 font-medium text-gray-900">Recent Activity</h2>
           <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
+            <Loader v-if="loading"/>
             <ul role="list" class="divide-y divide-gray-200">
               <li v-if="!loading && recentActivities?.length>0" v-for="activity in recentActivities" :key="activity.id">
                 <a href="#" class="block hover:bg-gray-50">
@@ -198,6 +199,7 @@
   import { formatDateTime } from '@/utils/utils';
   import { EyeIcon, EyeOffIcon, CopyIcon } from 'lucide-vue-next'
   import { useToast } from 'vue-toastification';
+  import { Loader } from 'lucide-vue-next';
 
   const toast = useToast()
   const loading = ref(true)
