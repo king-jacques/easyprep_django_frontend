@@ -119,7 +119,7 @@
                   </div>
                 </a>
               </li>
-              <li v-else>
+              <li v-else v-if="!loading">
                 You have no recent activities to show
               </li>
             </ul>
@@ -245,12 +245,18 @@
   onMounted(
     
     async() => {
-      const data = await axios.get(`${API_URL}/auth/profile/`)
-      loading.value = false
-      stats.value = data.data.stats
-      console.log(stats)
-      recentActivities.value = data.data.stats.recent_activity
-      totalUsers.value = data.data.stats.total_users
+      try{
+        const data = await axios.get(`${API_URL}/auth/profile/`)
+        loading.value = false
+        stats.value = data.data.stats
+        console.log(stats)
+        recentActivities.value = data.data.stats.recent_activity
+        totalUsers.value = data.data.stats.total_users
+      }catch(error){
+        recentActivities.value = []
+        totalUsers.value = '?'
+        toast.error(`Could not load data: ${error}`)
+      }
       
       
     }
