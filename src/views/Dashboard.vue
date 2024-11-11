@@ -191,7 +191,7 @@
   </template>
   
   <script setup>
-  import { ref, onMounted} from 'vue'
+  import { ref, onMounted, onBeforeMount} from 'vue'
   import { BellIcon, ChevronDownIcon, UsersIcon, UserIcon, ClockIcon } from 'lucide-vue-next'
   import { useUserStore } from '@/stores/user';
   import axios from 'axios';
@@ -242,7 +242,7 @@
       })
   }
   const recentActivities = ref([])
-  onMounted(
+  onBeforeMount(
     
     async() => {
       try{
@@ -253,6 +253,7 @@
         recentActivities.value = data.data.stats.recent_activity
         totalUsers.value = data.data.stats.total_users
       }catch(error){
+        loading.value = false
         recentActivities.value = []
         totalUsers.value = '?'
         toast.error(`Could not load data: ${error}`)
